@@ -49,5 +49,5 @@ Run tests with [rollup][] and [node][].
 rollup test.js | node
 ```
 
-rollup: http://rollupjs.org
-node: https://nodejs.org/
+[rollup]: http://rollupjs.org
+[node]: https://nodejs.org/
