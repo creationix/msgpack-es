@@ -168,7 +168,9 @@ function realEncode(value) {
     }
   }
 
-  throw new TypeError("Unknown type: " + Object.prototype.toString.call(value));
+  throw new TypeError(
+    "Unknown type: " + Object.prototype.toString.call(value) +
+    "\nPerhaps register it as a custom type?");
 }
 
 export function decode(buf) {
