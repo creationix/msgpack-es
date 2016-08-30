@@ -1,4 +1,4 @@
-import { flatten } from "./flatten"
+import { flatten, strToBin, binToStr } from "./bintools"
 
 let extensions = [];
 let extdex = {};
@@ -51,23 +51,6 @@ function pairMap(key) {
   ];
 }
 
-function encode_utf8(s) {
-  return unescape(encodeURIComponent(s));
-}
-function decode_utf8(s) {
-  return decodeURIComponent(escape(s));
-}
-function stringToBuffer(str) {
-  return rawToBuffer(encode_utf8(str));
-}
-function rawToBuffer(raw) {
-  let len = raw.length;
-  let buf = new Uint8Array(len);
-  for (let i = 0; i < len; i++) {
-    buf[i] = raw.charCodeAt(i);
-  }
-  return buf;
-}
 
 function tooLong(len, value) {
   throw new TypeError("Value is too long: " + (typeof value) + "/" + len);
@@ -113,7 +96,7 @@ function realEncode(value) {
 
   // str format family
   if (value.constructor === String) {
-    value = stringToBuffer(value);
+    value = strToBin(value);
     let len = value.length;
     if (len < 0x20) return [0xa0|len, value];
     if (len < 0x100) return [0xd9, len, value];
@@ -195,11 +178,9 @@ export function decode(buf) {
   }
 
   function readString(len) {
-    var str = "";
-    while (len--) {
-      str += String.fromCharCode(buffer[offset++]);
-    }
-    return decode_utf8(str);
+    var str = binToStr(buffer, offset, offset + len);
+    offset += len;
+    return str;
   }
 
   function readBin(len) {
@@ -253,6 +234,9 @@ export function decode(buf) {
   }
 
   function realDecode() {
+    if (offset >= buffer.length) {
+      throw new Error("Unexpected end of msgpack buffer");
+    }
     let first = buffer[offset++];
     // positive fixint
     if (first < 0x80) return first;
